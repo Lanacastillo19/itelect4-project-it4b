@@ -2,7 +2,11 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
+<<<<<<< HEAD
     "rootDir": "./",
+=======
+    "rootDir": "./src",
+>>>>>>> 0d2d63139c9dfcfea693eec4d4c37dcab7c2c971
     "outDir": "./dist",
 
     // Environment Settings
@@ -35,7 +39,11 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
+<<<<<<< HEAD
     "verbatimModuleSyntax": false,
+=======
+    "verbatimModuleSyntax": true,
+>>>>>>> 0d2d63139c9dfcfea693eec4d4c37dcab7c2c971
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
