@@ -1,30 +1,75 @@
-# Campus Lost & Found Tracker
+# React + TypeScript + Vite
 
-## Project Concept
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-This project is the TypeScript foundation for a Campus Lost & Found Tracker, where
-students can post lost or found items and campus admins can verify claims. Users
-report items they've lost or found, and other users can submit a claim on an item,
-which an admin then verifies.
+Currently, two official plugins are available:
 
-The types defined here (interfaces, generics, utility types, and enums) form the
-foundation that later modules (Module 2 onward) will build on top of — for example,
-using these interfaces as React component props, or as the shape of API responses.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Types Defined So Far
+## React Compiler
 
-- `User` — id, name, email, role (`student` | `admin`), isActive
-- `Item` — id, title, description, location, reportedBy, status (`ItemStatus`)
-- `Claim` — id, itemId, claimedBy, status (`ClaimStatus`), claimedAt
-- `ID`, `Coordinate`, `Formatter` — supporting type aliases
-- `ApiResponse<T>` — generic interface wrapping any data type in a standard response shape
-- `ItemUpdate` (`Partial<Item>`) — optional-field version of Item, for update payloads
-- `ItemPreview` (`Pick<Item, "id" | "title" | "status">`) — lightweight preview object
-- `PublicUser` (`Omit<User, "email" | "isActive">`) — safe-to-expose public profile
-- `RoleCount` (`Record<"student" | "admin", number>`) — dashboard-style counts
-- `ItemStatus` — enum, multi-step lifecycle (`Lost`, `Found`, `Claimed`, `Returned`)
-- `ClaimStatus` — const enum (`Pending`, `Verified`, `Rejected`)
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## How to Install and Run
+## Expanding the ESLint configuration
 
-1. Install dependencies:
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+
+```
+
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+
+```

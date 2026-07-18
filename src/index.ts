@@ -1,21 +1,13 @@
-import type {
-  User,
-  Item,
-  Claim,
-  ApiResponse,
-  ItemUpdate,
-  ItemPreview,
-  PublicUser,
-  RoleCount,
-} from "../types/index";
-import { ItemStatus, ClaimStatus } from "../types/index";
+import type { User, Course, Submission, ApiResponse, UserUpdate, StringOrNumber } from "./types/index";
+import { SubmissionStatus, Role } from "./types/index";
 
-// ===== PRIMITIVE TYPE ANNOTATIONS =====
-const projectName: string = "campus-lost-and-found";
+const projectName: string = "itelect4-project-gt1";
 const currentYear: number = 2026;
 const isFullStack: boolean = true;
 const nothing: null = null;
 const notSet: undefined = undefined;
+
+console.log({ projectName, currentYear, isFullStack, nothing, notSet });
 
 function greet(name: string, year: number): string {
   return `Welcome to ${name} -- AY ${year}!`;
@@ -24,13 +16,12 @@ function greet(name: string, year: number): string {
 function logMessage(message: string): void {
   console.log(message);
 }
-
 logMessage(greet(projectName, currentYear));
 
-// ===== SPECIAL TYPES =====
 let anything: any = "hello";
 anything = 42;
 anything = true;
+console.log(anything); 
 
 let userInput: unknown = "test";
 if (typeof userInput === "string") {
@@ -41,97 +32,76 @@ function throwError(message: string): never {
   throw new Error(message);
 }
 
-// ===== SAMPLE DATA =====
 const student: User = {
   id: 1,
-  name: "Juan Luna",
+  name: "Juan dela Cruz",
   email: "juan@example.com",
   role: "student",
   isActive: true,
 };
 
-const admin: User = {
-  id: 2,
-  name: "Maria Santos",
-  email: "maria.santos@example.com",
-  role: "admin",
-  isActive: true,
+const course: Course = {
+  code: "ITELECT4",
+  title: "IT Elective 4",
+  units: 3,
+  semester: "1st Semester 2026-2027",
 };
 
-const foundItem: Item = {
+const mockSubmission: Submission = {
   id: 1,
-  title: "Silver Laptop",
-  description: "Found in Room 204, left on a desk after class",
-  location: "Room 204",
-  reportedBy: student.id,
-  status: ItemStatus.Found,
-};
-
-const itemClaim: Claim = {
-  id: 1,
-  itemId: foundItem.id,
-  claimedBy: student.id,
-  status: ClaimStatus.Pending,
-  claimedAt: new Date(),
+  studentId: 1,
+  courseCode: "ITELECT4",
+  repoUrl: "github.com",
+  submittedAt: new Date()
 };
 
 console.log(student);
-console.log(foundItem);
+console.log(course);
+console.log(mockSubmission); 
 
-// ===== GENERIC FUNCTIONS =====
+function processInput(input: StringOrNumber): string {
+  if (typeof input === "string") {
+    return input.toUpperCase();
+  }
+  return input.toFixed(2);
+}
+
+function formatDate(value: string | Date): string {
+  if (value instanceof Date) {
+    return value.toLocaleDateString();
+  }
+  return value;
+}
+console.log(processInput("hello"));
+console.log(processInput(3.14159));
+console.log(formatDate(new Date()));
+
 function getFirst<T>(items: T[]): T | undefined {
   return items[0];
 }
 
-function getById<T extends { id: number }>(
-  items: T[],
-  id: number
-): T | undefined {
-  return items.find((item) => item.id === id);
-}
+const usersList: User[] = [student];
+const firstUser = getFirst<User>(usersList);
+console.log(`First User Name: ${firstUser?.name}`);
 
-const firstItem = getFirst<Item>([foundItem]);
-const foundById = getById<Item>([foundItem], 1);
-
-console.log(firstItem?.title);
-console.log(foundById?.location);
-
-// ===== GENERIC INTERFACE USAGE =====
-const itemResponse: ApiResponse<Item> = {
+const userResponse: ApiResponse<User> = {
   success: true,
-  data: foundItem,
+  data: student,
 };
+console.log(`API Response Status: ${userResponse.success}`);
 
-const claimsResponse: ApiResponse<Claim[]> = {
-  success: true,
-  data: [itemClaim],
-};
+const profileUpdate: UserUpdate = { name: "Juan D. Cruz" };
+console.log(profileUpdate); 
 
-console.log(itemResponse.data.title);
+let currentStatus: SubmissionStatus = SubmissionStatus.Pending;
+console.log(`Submission Status Index: ${currentStatus}`);
 
-// ===== USING UTILITY TYPES =====
-const patch: ItemUpdate = { status: ItemStatus.Claimed };
+currentStatus = SubmissionStatus.Graded; 
+console.log(`Is it graded? ${currentStatus === SubmissionStatus.Graded}`);
 
-const preview: ItemPreview = { id: 1, title: "Silver Laptop", status: ItemStatus.Found };
+const myRole: Role = Role.Student;
+console.log(`My Role: ${myRole}`);
 
-const publicProfile: PublicUser = { id: 1, name: "Juan Luna", role: "student" };
-
-const roleCount: RoleCount = { student: 45, admin: 3 };
-
-// ===== ReturnType<T> =====
-function makeClaim(itemId: number, userId: number) {
-  return { id: 1, itemId, claimedBy: userId, claimedAt: new Date() };
+if (false) {
+  throwError("Test");
 }
-
-type NewClaim = ReturnType<typeof makeClaim>;
-const newClaim: NewClaim = makeClaim(1, 1);
-
-// ===== USING THE ENUM =====
-let status: ItemStatus = ItemStatus.Lost;
-console.log(ItemStatus[status]);
-
-status = ItemStatus.Found;
-console.log(status === ItemStatus.Found);
-
-const claimStatus: ClaimStatus = ClaimStatus.Pending;
-console.log(claimStatus);

@@ -1,40 +1,82 @@
+// ===== INTERFACES =====
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: "student" | "admin";
+  role: "student" | "admin" | "instructor"; 
   isActive: boolean;
+  score?: number; 
 }
 
-export interface Item {
-  id: number;
+export interface Course {
+  code: string;
   title: string;
-  description: string;
-  location: string;
-  reportedBy: number; // User id
-  status: ItemStatus;
+  units: number;
+  semester: string;
 }
 
-export interface Claim {
+export interface Submission {
   id: number;
-  itemId: number;
-  claimedBy: number; // User id
-  status: ClaimStatus;
-  claimedAt: Date;
+  studentId: number;
+  courseCode: string;
+  repoUrl: string;
+  submittedAt: Date;
+  score?: number; 
 }
 
 // ===== TYPE ALIASES =====
 export type ID = number | string;
-
 export type Coordinate = {
   x: number;
   y: number;
 };
-
 export type Formatter = (value: number) => string;
 
+// Using them + added console.log to fix unused variable warning
+const studentId: ID = "S2026-001";
+const position: Coordinate = { x: 10, y: 20 };
+const formatScore: Formatter = (value) => `${value}%`;
+console.log(studentId); 
+console.log(formatScore(95.5));
+console.log(position); 
+
+// ===== UNION TYPES =====
+export type StringOrNumber = string | number;
+export type Status = "pending" | "active" | "inactive"; 
+
+export function printId(id: StringOrNumber): void {
+  console.log(`ID: ${id}`);
+}
+printId(101);
+printId("S2026-001");
+
+// ===== INTERSECTION TYPES =====
+export type StudentWithCourse = User & {
+  enrolledCourse: Course;
+  gpa: number;
+};
+
+const topStudent: StudentWithCourse = {
+  id: 1,
+  name: "Maria Santos",
+  email: "m@example.com",
+  role: "student",
+  isActive: true,
+  enrolledCourse: {
+    code: "ITELECT4",
+    title: "IT Elective 4",
+    units: 3,
+    semester: "1st",
+  },
+  gpa: 1.25,
+};
+console.log(topStudent); 
+
+// ==========================================
+// ===== SESSION 2 ADDITIONS (GT1 PART 2) =====
+// ==========================================
+
 // ===== GENERIC INTERFACE =====
-// ApiResponse<T> can wrap ANY data type -- every future GT reuses this
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -42,30 +84,23 @@ export interface ApiResponse<T> {
 }
 
 // ===== UTILITY TYPES =====
-// Partial<T> -- every field becomes optional (good for update payloads)
-export type ItemUpdate = Partial<Item>;
+export type UserUpdate = Partial<User>;
+export type NewSubmissionPayload = Omit<Submission, "id">;
 
-// Pick<T, K> -- keep ONLY the listed fields
-export type ItemPreview = Pick<Item, "id" | "title" | "status">;
+// ===== ENUMS (Fixed for erasableSyntaxOnly compatibility) =====
+export const SubmissionStatus = {
+  Pending: 0,
+  Graded: 1,
+  Late: 2,
+} as const;
+export type SubmissionStatus = typeof SubmissionStatus[keyof typeof SubmissionStatus];
 
-// Omit<T, K> -- keep every field EXCEPT the listed ones
-export type PublicUser = Omit<User, "email" | "isActive">;
+export const Role = {
+  Student: "student",
+  Admin: "admin",
+  Instructor: "instructor",
+} as const;
+export type Role = typeof Role[keyof typeof Role];
 
-// Record<K, T> -- a fixed set of keys, each mapped to the same value type
-export type RoleCount = Record<"student" | "admin", number>;
-
-// ===== ENUMS =====
-// Regular enum -- multi-step status lifecycle for an Item (lost -> found -> claimed -> returned)
-export enum ItemStatus {
-  Lost,
-  Found,
-  Claimed,
-  Returned,
-}
-
-// const enum -- inlined at compile time, zero runtime overhead
-export const enum ClaimStatus {
-  Pending = "pending",
-  Verified = "verified",
-  Rejected = "rejected",
-}
+export const UserRole = Role;
+export type UserRole = Role;
