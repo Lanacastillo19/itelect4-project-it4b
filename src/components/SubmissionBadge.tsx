@@ -1,19 +1,18 @@
-import React from "react";
 import type { Submission } from "../types/index";
 
 interface SubmissionBadgeProps {
-  submission: Submission;
-  children?: React.ReactNode;
+  submission?: Submission;
+  status?: string;
 }
 
-const SubmissionBadge: React.FC<SubmissionBadgeProps> = ({ submission, children }) => {
+function SubmissionBadge({ submission, status }: SubmissionBadgeProps) {
+  const displayText = status || (submission as any)?.status || "Submitted";
+
   return (
-    <div className="submission-badge" style={{ border: "1px solid #ccc", padding: "15px", margin: "10px", borderRadius: "8px", backgroundColor: "#1e1e1e", color: "#fff" }}>
-      <p><strong>Repository:</strong> {submission.repoUrl}</p>
-      <p><strong>Evaluation Score:</strong> {submission.score ?? "Not graded yet"}</p>
-      {children}
-    </div>
+    <span className="inline-block rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900 dark:text-green-200">
+      {displayText}
+    </span>
   );
-};
+}
 
 export default SubmissionBadge;
