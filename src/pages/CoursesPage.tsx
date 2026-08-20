@@ -1,19 +1,48 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router";
-import { allCourses } from "../data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCourses } from "../api/client";
+import useUiStore from "../store/uiStore";
 
 function CoursesPage() {
-  const [query, setQuery] = useState("");
+  const searchTerm = useUiStore((state) => state.searchTerm);
+  const setSearchTerm = useUiStore((state) => state.setSearchTerm);
+
+  const {
+    data: courses = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["courses"],
+    queryFn: fetchCourses,
+  });
 
   const visibleCourses = useMemo(
     () =>
-      allCourses.filter(
+      courses.filter(
         (course) =>
-          course.title.toLowerCase().includes(query.toLowerCase()) ||
-          course.code.toLowerCase().includes(query.toLowerCase())
+          course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          course.code.toLowerCase().includes(searchTerm.toLowerCase())
       ),
-    [query]
+    [courses, searchTerm]
   );
+
+  if (isLoading) {
+    return (
+      <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        Loading courses...
+      </p>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-950 dark:text-red-200">
+        {error instanceof Error ? error.message : "Error loading courses"}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -22,8 +51,8 @@ function CoursesPage() {
       </h2>
 
       <input
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        value={searchTerm}
+        onChange={(event) => setSearchTerm(event.target.value)}
         placeholder="Search courses by code or title..."
         className="w-full rounded-md border border-slate-400 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-blue-500 focus:ring-2 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
       />

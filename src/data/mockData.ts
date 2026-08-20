@@ -1,4 +1,4 @@
-import type { User, Course, Submission, LostItem } from "../types/index";
+import type { User, Course, Submission } from "../types/index";
 
 export const student: User = {
   id: 1,
@@ -8,20 +8,23 @@ export const student: User = {
   isActive: true,
 };
 
-export const allCourses: Course[] = [
+export const courses: Course[] = [
   {
+    id: 1,
     code: "ITELECT4",
     title: "IT Elective 4 - Web Architecture & Development",
     units: 3,
     semester: "1st Semester 2026-2027",
   },
   {
+    id: 2,
     code: "ITELECT3",
     title: "IT Elective 3 - Enterprise Systems",
     units: 3,
     semester: "2nd Semester 2025-2026",
   },
   {
+    id: 3,
     code: "CSSWENG",
     title: "Software Engineering Principles",
     units: 3,
@@ -55,8 +58,4 @@ export const allSubmissions: Submission[] = [
   },
 ];
 
-export const lostItems: LostItem[] = [
-  { id: 1, name: "USB Flash Drive", location: "Innovation Hub" },
-  { id: 2, name: "Canvas Tote Bag", location: "Student Lounge" },
-  { id: 3, name: "Smart Watch", location: "West Hallway" },
-];
+export const allCourses = courses;

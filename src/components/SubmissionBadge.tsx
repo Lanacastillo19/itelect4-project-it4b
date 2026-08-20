@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import type { Submission } from "../types";
+import type { ApiSubmission } from "../types";
 
 interface SubmissionBadgeProps {
-  submission: Submission;
+  submission: ApiSubmission;
   children?: ReactNode;
 }
 
@@ -24,7 +24,11 @@ export default function SubmissionBadge({
       <p className="mt-2 text-sm text-slate-800 dark:text-slate-200">
         <span className="font-medium">Repository:</span>{" "}
         <a
-          href={submission.repoUrl}
+          href={
+            submission.repoUrl.startsWith("http")
+              ? submission.repoUrl
+              : `https://${submission.repoUrl}`
+          }
           target="_blank"
           rel="noreferrer"
           className="text-blue-500 underline hover:text-blue-600"

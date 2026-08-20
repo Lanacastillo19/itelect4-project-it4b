@@ -9,6 +9,7 @@ export interface User {
 }
 
 export interface Course {
+  id?: number;
   code: string;
   title: string;
   units: number;
@@ -74,3 +75,10 @@ export type Role = (typeof Role)[keyof typeof Role];
 
 export const UserRole = Role;
 export type UserRole = Role;
+
+export type ApiSubmission = Omit<Submission, "id" | "submittedAt"> & {
+  id: string;
+  submittedAt: string;
+};
+
+export type NewSubmission = Omit<ApiSubmission, "id">;
