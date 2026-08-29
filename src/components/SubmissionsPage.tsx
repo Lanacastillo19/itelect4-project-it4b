@@ -1,10 +1,14 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { fetchSubmissions, createSubmission, fetchCourses } from "../api/client";
+import { submissionSchema, type SubmissionFormValues } from "../schemas/submissionSchema";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function SubmissionsPage() {
-  const [courseCode, setCourseCode] = useState("");
-  const [repoUrl, setRepoUrl] = useState("");
   const queryClient = useQueryClient();
 
   const { data: courses = [] } = useQuery({
@@ -17,65 +21,84 @@ export default function SubmissionsPage() {
     queryFn: fetchSubmissions,
   });
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<SubmissionFormValues>({
+    resolver: zodResolver(submissionSchema),
+    defaultValues: { courseCode: "", repoUrl: "" },
+  });
+
   useEffect(() => {
-    if (courses.length > 0 && !courseCode) {
-      setCourseCode(courses[0].code);
+    if (courses.length > 0) {
+      setValue("courseCode", courses[0].code);
     }
-  }, [courses, courseCode]);
+  }, [courses, setValue]);
 
   const mutation = useMutation({
     mutationFn: createSubmission,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["submissions"] });
-      setRepoUrl("");
+      reset({ courseCode: courses[0]?.code || "", repoUrl: "" });
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!repoUrl.trim() || !courseCode) return;
-
-  mutation.mutate({
-    studentId: 1,
-    courseCode,
-    repoUrl,
-    submittedAt: new Date(), 
-  });
-};
+  const onSubmit = (data: SubmissionFormValues) => {
+    mutation.mutate({
+      studentId: 1,
+      courseCode: data.courseCode,
+      repoUrl: data.repoUrl,
+      submittedAt: new Date(),
+    });
+  };
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Submissions</h1>
 
-      <form onSubmit={handleSubmit} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 space-y-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 space-y-4"
+      >
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Submit Repository</h2>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <select
-            value={courseCode}
-            onChange={(e) => setCourseCode(e.target.value)}
-            className="rounded border border-slate-300 p-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-          >
-            {courses.map((course) => (
-              <option key={course.code} value={course.code}>
-                {course.code}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="GitHub Repo URL (e.g. github.com/user/repo)"
-            value={repoUrl}
-            onChange={(e) => setRepoUrl(e.target.value)}
-            className="flex-1 rounded border border-slate-300 p-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            required
-          />
-          <button
-            type="submit"
-            disabled={mutation.isPending}
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-          >
+        <div className="flex flex-col gap-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="courseCode">Course</Label>
+            <select
+              id="courseCode"
+              {...register("courseCode")}
+              className="w-full rounded border border-slate-300 p-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            >
+              {courses.map((course) => (
+                <option key={course.code} value={course.code}>
+                  {course.code}
+                </option>
+              ))}
+            </select>
+            {errors.courseCode && (
+              <p className="text-xs text-red-500">{errors.courseCode.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="repoUrl">Repository URL</Label>
+            <Input
+              id="repoUrl"
+              type="text"
+              placeholder="https://github.com/user/repo"
+              {...register("repoUrl")}
+            />
+            {errors.repoUrl && (
+              <p className="text-xs text-red-500">{errors.repoUrl.message}</p>
+            )}
+          </div>
+
+          <Button type="submit" disabled={mutation.isPending} className="w-fit">
             {mutation.isPending ? "Submitting..." : "Submit"}
-          </button>
+          </Button>
         </div>
       </form>
 
